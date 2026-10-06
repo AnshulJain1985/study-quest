@@ -4,14 +4,13 @@ window.APP_CONFIG = {
   parentName: 'Parent',
 
   // Paste the web-app config from Firebase console > Project settings > Your apps.
-  // Leave it as null to run in demo mode (data stays in this browser only).
-  firebase: null,
-  // firebase: {
-  //   apiKey: '...',
-  //   authDomain: 'your-project.firebaseapp.com',
-  //   projectId: 'your-project',
-  //   appId: '...'
-  // },
+  // Set it to null to run in demo mode (data stays in this browser only).
+  firebase: {
+    apiKey: 'AIzaSyABH1AqbGDsWCQymHWkPcKPgVMRthfklN4',
+    authDomain: 'study-quest-ashray.firebaseapp.com',
+    projectId: 'study-quest-ashray',
+    appId: '1:787475825286:web:63d17314c4e2535acb8707'
+  },
 
   // Exam dates drive the whole plan. Change them when the school datesheet arrives.
   dates: {
