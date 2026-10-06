@@ -1,4 +1,4 @@
-// app.js: the study tracker. Works with Firebase (real logins) or in demo mode (this browser only).
+// app.js: the study tracker. Real logins and shared data through Firebase.
 (function () {
   'use strict';
   const CFG = window.APP_CONFIG;
@@ -18,24 +18,6 @@
   const xpOfTask = t => t.optional ? 5 : 10;
 
   // ---------- storage ----------
-  const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
-  const merge = (a, b) => { const o = Object.assign({}, a); for (const k in b) o[k] = isObj(b[k]) && isObj(a && a[k]) ? merge(a[k], b[k]) : b[k]; return o; };
-
-  class LocalStore {
-    constructor() { this.key = 'study-tracker-demo-v1'; try { this.data = JSON.parse(localStorage.getItem(this.key)); } catch (e) { this.data = null; } this.data = this.data || { days: {}, tests: {}, settings: {} }; }
-    async init(onUser) { let r = null; try { r = sessionStorage.getItem('st-demo-role'); } catch (e) { } this.onUser = onUser; onUser(r ? { role: r } : null); }
-    demo(role) { try { sessionStorage.setItem('st-demo-role', role); } catch (e) { } this.onUser({ role }); }
-    async signOut() { try { sessionStorage.removeItem('st-demo-role'); } catch (e) { } this.onUser(null); }
-    subscribe(cb) { this.cb = cb; cb(this.data); }
-    save(coll, id, patch) {
-      if (coll === 'settings') this.data.settings = merge(this.data.settings, patch);
-      else this.data[coll][id] = merge(this.data[coll][id] || {}, patch);
-      try { localStorage.setItem(this.key, JSON.stringify(this.data)); } catch (e) { }
-      if (this.cb) this.cb(this.data);
-      return Promise.resolve();
-    }
-  }
-
   class FireStore {
     async init(onUser) {
       const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
@@ -68,8 +50,7 @@
     }
   }
 
-  const DEMO = !CFG.firebase;
-  const store = DEMO ? new LocalStore() : new FireStore();
+  const store = new FireStore();
   const save = (coll, id, patch) => store.save(coll, id, patch).catch(e => toast('Not saved: ' + e.message));
 
   // ---------- state ----------
@@ -441,10 +422,6 @@
 
   // ---------- shell ----------
   function loginView(msg) {
-    if (DEMO) return `<main class="login"><div class="login-logo" aria-hidden="true">🎮</div><h1>${esc(CFG.studentName)}\u2019s Study Quest</h1>
-      <p>Clear daily quests, keep the flame burning, beat the boss tests and level up.</p>
-      <div class="login-btns"><button class="btn big" data-act="demo" data-role="student">▶ Play as ${esc(CFG.studentName)}</button><button class="btn ghost" data-act="demo" data-role="parent">Parent view</button></div>
-      <p class="small" style="margin-top:1.25rem">Demo mode: progress is saved in this browser only.</p></main>`;
     return `<main class="login"><div class="login-logo" aria-hidden="true">🎮</div><h1>${esc(CFG.studentName)}\u2019s Study Quest</h1>
       <form id="login" class="sheet login-form"><label>E-mail <input type="email" name="email" autocomplete="username" required></label>
       <label>Password <input type="password" name="pw" autocomplete="current-password" required></label>
@@ -463,7 +440,7 @@
     if (state.view === 'tests') body = testsView();
     if (state.view === 'progress') body = progressView();
     app.innerHTML = `<header class="top"><div class="brand"><span class="brand-logo" aria-hidden="true">🎮</span><span class="brand-text"><span class="brand-name">Study Quest</span>
-        <span class="brand-sub">${isParent() ? 'Parent view' : 'Player: ' + esc(CFG.studentName)}${DEMO ? ' \u00b7 demo' : ''}</span></span></div>
+        <span class="brand-sub">${isParent() ? 'Parent view' : 'Player: ' + esc(CFG.studentName)}</span></span></div>
       <nav aria-label="Sections">${tabs.map(([v, ic, l]) => `<button class="tab ${state.view === v ? 'on' : ''}" data-act="nav" data-view="${v}" ${state.view === v ? 'aria-current="page"' : ''}><span class="tab-ic" aria-hidden="true">${ic}</span><span class="tab-l">${l}</span></button>`).join('')}</nav>
       <div class="lvl" title="${lv.xp} XP, ${lv.span - lv.into} to the next level"><span class="lvl-badge" aria-label="Level ${lv.l}">${lv.l}</span><span class="lvl-info"><span class="lvl-rank">${esc(lv.rank)}</span>${meter(lv.pct, 'xp thin')}</span></div>
       <div class="flame-pill" title="Current streak"><span class="fl" aria-hidden="true">🔥</span>${s.current}<span class="sr">day streak</span></div>
@@ -546,7 +523,6 @@
     else if (act === 'month') { state.month = a.dataset.m; render(); }
     else if (act === 'test') { state.testId = a.dataset.id; state.view = 'tests'; render(); window.scrollTo(0, 0); }
     else if (act === 'back') { state.testId = null; render(); }
-    else if (act === 'demo') store.demo(a.dataset.role);
     else if (act === 'signout') store.signOut();
     else if (act === 'pass') { const d = a.dataset.date; ask('Use your one free pass this month for this day? It keeps your streak safe.', { ok: 'Use the free pass' }).then(ok => { if (ok) save('days', d, { freePass: true, updatedAt: nowIso() }); }); }
     else if (act === 'offday') {

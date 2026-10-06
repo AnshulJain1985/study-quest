@@ -4,7 +4,6 @@ window.APP_CONFIG = {
   parentName: 'Parent',
 
   // Paste the web-app config from Firebase console > Project settings > Your apps.
-  // Set it to null to run in demo mode (data stays in this browser only).
   firebase: {
     apiKey: 'AIzaSyABH1AqbGDsWCQymHWkPcKPgVMRthfklN4',
     authDomain: 'study-quest-ashray.firebaseapp.com',

@@ -67,8 +67,6 @@ firebase.json       hosting + rules deploy settings
 .firebaserc         your Firebase project id
 ```
 
-Without Firebase settings, the app runs in **demo mode**: data stays in that browser only, and two buttons let you open it as the student or the parent. That is the quickest way to try it.
-
 ## Setting it up (about 30 minutes, once)
 
 1. **Create the project.** Go to <https://console.firebase.google.com>, add a project (Google Analytics is not needed), and stay on the free Spark plan.
