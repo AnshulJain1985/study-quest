@@ -11,7 +11,7 @@ A one-page web app, styled like a game, that turns the study plan into daily que
 | Tests | Opens on its date with a timer. Section A is marked automatically on submit; Section B is written on paper | Reads his answers next to the model answer and marking scheme, enters marks and a comment |
 | Progress | Streak record, sessions done per subject, test results, chapter status (on track or behind) | Same, plus a CSV download that opens in Google Sheets |
 
-The plan runs from 5 October 2026 to the Annual exam (15-27 February 2027) in four phases:
+The plan runs from 7 October 2026 to the Annual exam (15-27 February 2027) in four phases:
 
 1. Keep pace and repair, to 14 Nov.
 2. Periodic Test II sprint, 16-29 Nov.

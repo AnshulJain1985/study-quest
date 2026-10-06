@@ -13,7 +13,7 @@ window.APP_CONFIG = {
 
   // Exam dates drive the whole plan. Change them when the school datesheet arrives.
   dates: {
-    start: '2026-10-05',        // first day of the plan (a Monday)
+    start: '2026-10-07',        // first day of the plan
     pt2Start: '2026-11-30',     // Periodic Test II, first paper
     pt2End: '2026-12-04',       // Periodic Test II, last paper
     annualStart: '2027-02-15',  // Annual exam, first paper
