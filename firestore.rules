@@ -1,0 +1,45 @@
+rules_version = '2';
+// Two roles, set by hand in the "roles" collection (document id = the user's UID):
+//   role: "parent"  -> can read and change everything
+//   role: "student" -> can tick tasks, write notes, take tests; cannot mark tests,
+//                      change parent comments, or edit a test after submitting it
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function roleDoc() { return /databases/$(database)/documents/roles/$(request.auth.uid); }
+    function hasRole(r) { return signedIn() && exists(roleDoc()) && get(roleDoc()).data.role == r; }
+    function isParent() { return hasRole('parent'); }
+    function isStudent() { return hasRole('student'); }
+    function changedOnly(fields) {
+      return resource == null
+        ? request.resource.data.keys().hasOnly(fields)
+        : request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
+    match /roles/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isParent());
+      allow write: if false; // set roles in the Firebase console only
+    }
+
+    match /settings/{doc} {
+      allow read: if isParent() || isStudent();
+      allow write: if isParent();
+    }
+
+    match /days/{day} {
+      allow read: if isParent() || isStudent();
+      allow write: if isParent();
+      allow create, update: if isStudent()
+        && changedOnly(['done', 'scores', 'learned', 'note', 'updatedAt', 'freePass']);
+    }
+
+    match /tests/{testId} {
+      allow read: if isParent() || isStudent();
+      allow write: if isParent();
+      allow create, update: if isStudent()
+        && changedOnly(['startedAt', 'mcq', 'written', 'submittedAt', 'mcqScore', 'mcqMax',
+                        'externalScore', 'externalMax', 'note'])
+        && (resource == null || !('submittedAt' in resource.data));
+    }
+  }
+}
